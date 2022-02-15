@@ -1,16 +1,17 @@
-name: JFrog CLI
-
-on: [push]
-
+on: push
+name: Main Workflow
 jobs:
-  build:
+  artifactoryUpload:
+    name: Upload Trigger
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Artifactory
-        uses: katcosgrove/jfrog-actions@master
-        with:
-            cmd: 'ping'
-        env:
-            auth: ${{ secrets.ARTIFACTORY_TOKEN }}
-            apikey: ${{ secrets.ARTIFACTORY_API_KEY }}
-            url: ${{ secrets.ARTIFACTORY_URL }}
+    - uses: actions/checkout@v1.2.0
+    - name: build
+      run: ./buildmyartifact.sh
+    - name: publish to artifactory
+      uses: advancedcsg-open/action-jfrog-cli@master
+      with:
+        url: ${{ secrets.ARTIFACTORY_URL }}
+        credentials type: 'apikey'
+        apikey: ${{ secrets.ARTIFACTORY_API_KEY }}
+        args: u "dist/*" "/mu/repo/path/" --recursive=true --build-name=myawesomeapp
